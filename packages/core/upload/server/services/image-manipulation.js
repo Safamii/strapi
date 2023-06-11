@@ -64,13 +64,19 @@ const resizeFileTo = async (file, options, { name, hash }) => {
 };
 
 const generateThumbnail = async (file) => {
+  const sizeNamePosition = strapi.config.get('plugin.upload.sizeNamePosition', 'prefix');
+  const filenameWithPrefix = `thumbnail_${file.name}`;
+  const hashWithPrefix = `thumbnail_${file.hash}`;
+  const filenameWithSuffix = `${file.name}_thumbnail`;
+  const hashWithSuffix = `${file.hash}_thumbnail`;
+
   if (
     file.width > THUMBNAIL_RESIZE_OPTIONS.width ||
     file.height > THUMBNAIL_RESIZE_OPTIONS.height
   ) {
     const newFile = await resizeFileTo(file, THUMBNAIL_RESIZE_OPTIONS, {
-      name: `thumbnail_${file.name}`,
-      hash: `thumbnail_${file.hash}`,
+      name: sizeNamePosition === 'prefix' ? filenameWithPrefix : filenameWithSuffix,
+      hash: sizeNamePosition === 'prefix' ? hashWithPrefix : hashWithSuffix
     });
     return newFile;
   }
@@ -152,6 +158,12 @@ const generateResponsiveFormats = async (file) => {
 };
 
 const generateBreakpoint = async (key, { file, breakpoint }) => {
+  const sizeNamePosition = strapi.config.get('plugin.upload.sizeNamePosition', 'prefix');
+  const filenameWithPrefix = `${key}_${file.name}`;
+  const hashWithPrefix = `${key}_${file.hash}`;
+  const filenameWithSuffix = `${file.name}_${key}`;
+  const hashWithSuffix = `${file.hash}_${key}`;
+
   const newFile = await resizeFileTo(
     file,
     {
@@ -160,8 +172,8 @@ const generateBreakpoint = async (key, { file, breakpoint }) => {
       fit: 'inside',
     },
     {
-      name: `${key}_${file.name}`,
-      hash: `${key}_${file.hash}`,
+      name: sizeNamePosition === 'prefix' ? filenameWithPrefix : filenameWithSuffix,
+      hash: sizeNamePosition === 'prefix' ? hashWithPrefix : hashWithSuffix,
     }
   );
   return {
